@@ -27,7 +27,7 @@ var emptyFilter = {
  * @augments Webcheck.Plugin
  * @constructor
  */
-var CheerioPlugin = function (opts) {
+var CrawlOncePlugin = function (opts) {
     var self;
     WebcheckPlugin.apply(this, arguments);
 
@@ -61,7 +61,7 @@ var CheerioPlugin = function (opts) {
     this.reset();
 };
 
-CheerioPlugin.prototype = {
+CrawlOncePlugin.prototype = {
     '__proto__': WebcheckPlugin.prototype,
     package: pkg,
 
@@ -103,4 +103,4 @@ CheerioPlugin.prototype = {
 
 };
 
-module.exports = CheerioPlugin;
+module.exports = CrawlOncePlugin;
