@@ -15,8 +15,8 @@ var Webcheck = require('webcheck');
 var CrawlOncePlugin = require('webcheck-crawl-once');
 
 var plugin = CrawlOncePlugin({
-    filterUrl:
-    ignoreQuery: false,
+    // filterUrl: /.html/,
+    ignoreQuery: false
 });
 
 var webcheck = new Webcheck();
