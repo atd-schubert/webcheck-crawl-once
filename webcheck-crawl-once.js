@@ -35,14 +35,10 @@ var CrawlOncePlugin = function (opts) {
 
     opts = opts || {};
 
-    // unsupported at the moment but maybe comming in a next version
-    // opts.filterContentType = opts.filterContentType || emptyFilter;
-    // opts.filterStatusCode = opts.filterStatusCode || emptyFilter;
-
     opts.filterUrl = opts.filterUrl || emptyFilter;
     opts.ignoreQuery = opts.ignoreQuery || false;
 
-    this.on.queue = function (settings) {
+    this.on.crawl = function (settings) {
         var parsedUrl;
         if (opts.filterUrl.test(settings.url)) {
             if (opts.ignoreQuery) {
