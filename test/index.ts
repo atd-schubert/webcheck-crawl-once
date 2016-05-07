@@ -1,33 +1,28 @@
-/*jslint node:true*/
+/// <reference path="../typings/main.d.ts" />
 
-/*global describe, it, before, after, beforeEach, afterEach*/
+import { CrawlOncePlugin } from '../webcheck-crawl-once';
+import { Webcheck } from 'webcheck';
+import * as freeport from 'freeport';
+import * as express from 'express';
 
-'use strict';
+/* tslint:disable:align */
 
-var CrawlOncePlugin = require('../');
+describe('Crawl Once Plugin', (): void => {
+    var port: number;
+    before((done: MochaDone): void => {
+        var app: express.Application = express();
 
-var Webcheck = require('webcheck');
-var freeport = require('freeport');
-var express = require('express');
-
-describe('Crawl Once Plugin', function () {
-    var port;
-    before(function (done) {
-        var app = express();
-
-        /*jslint unparam: true*/
-        app.get('/doNotMiss', function (req, res) {
+        app.get('/doNotMiss', (req: express.Request, res: express.Response): void => {
             res.send('<html><head></head><body><p>index</p></body></html>');
         });
-        app.get('/doNotMiss/ignore', function (req, res) {
+        app.get('/doNotMiss/ignore', (req: express.Request, res: express.Response): void => {
             res.send('<html><head></head><body><p>ignore</p></body></html>');
         });
-        app.get('/miss', function (req, res) {
+        app.get('/miss', (req: express.Request, res: express.Response): void => {
             res.send('<html><head></head><body><p>missByFilter</p></body></html>');
         });
-        /*jslint unparam: false*/
 
-        freeport(function (err, p) {
+        freeport((err: Error, p: number): void => {
             if (err) {
                 done(err);
             }
@@ -37,25 +32,26 @@ describe('Crawl Once Plugin', function () {
         });
     });
 
-    describe('Basic functions', function () {
-        var webcheck, plugin;
+    describe('Basic functions', (): void => {
+        var webcheck: Webcheck,
+            plugin: CrawlOncePlugin;
 
-        before(function () {
-            webcheck = new Webcheck();
+        before((): void => {
+            webcheck = new Webcheck({});
             plugin = new CrawlOncePlugin({
                 filterUrl: /doNotMiss/
             });
             webcheck.addPlugin(plugin);
             plugin.enable();
         });
-        it('should crawl a website if it is not in ignore list', function (done) {
-            var crawled;
-            webcheck.once('result', function () {
+        it('should crawl a website if it is not in ignore list', (done: MochaDone): void => {
+            var crawled: boolean;
+            webcheck.once('result', (): void => {
                 crawled = true;
             });
             webcheck.crawl({
                 url: 'http://localhost:' + port + '/doNotMiss/'
-            }, function (err) {
+            }, (err: Error): void => {
                 if (err) {
                     return done(err);
                 }
@@ -65,13 +61,13 @@ describe('Crawl Once Plugin', function () {
                 return done(new Error('Not crawled'));
             });
         });
-        it('should not crawl a site a second time', function (done) {
-            webcheck.middlewares.push(function () {
+        it('should not crawl a site a second time', (done: MochaDone): void => {
+            webcheck.middlewares.push((): void => {
                 return done(new Error('Crawled again'));
             });
             webcheck.crawl({
                 url: 'http://localhost:' + port + '/doNotMiss/'
-            }, function (err) {
+            }, (err: Error): void => {
                 if (err) {
                     return done(err);
                 }
@@ -79,14 +75,14 @@ describe('Crawl Once Plugin', function () {
                 return done();
             });
         });
-        it('should be able to crawl an unfiltered website', function (done) {
-            var crawled;
-            webcheck.once('result', function () {
+        it('should be able to crawl an unfiltered website', (done: MochaDone): void => {
+            var crawled: boolean;
+            webcheck.once('result', (): void => {
                 crawled = true;
             });
             webcheck.crawl({
                 url: 'http://localhost:' + port + '/miss/'
-            }, function (err) {
+            }, (err: Error): void => {
                 if (err) {
                     return done(err);
                 }
@@ -96,14 +92,14 @@ describe('Crawl Once Plugin', function () {
                 return done(new Error('Not crawled'));
             });
         });
-        it('should be able to crawl an unfiltered website again', function (done) {
-            var crawled;
-            webcheck.once('result', function () {
+        it('should be able to crawl an unfiltered website again', (done: MochaDone): void => {
+            var crawled: boolean;
+            webcheck.once('result', (): void => {
                 crawled = true;
             });
             webcheck.crawl({
                 url: 'http://localhost:' + port + '/miss/'
-            }, function (err) {
+            }, (err: Error): void => {
                 if (err) {
                     return done(err);
                 }
@@ -113,14 +109,14 @@ describe('Crawl Once Plugin', function () {
                 return done(new Error('Not crawled'));
             });
         });
-        it('should not crawl a site from ignore list', function (done) {
+        it('should not crawl a site from ignore list', (done: MochaDone): void => {
             plugin.ignore('http://localhost:' + port + '/doNotMiss/ignore');
-            webcheck.middlewares.push(function () {
+            webcheck.middlewares.push((): void => {
                 return done(new Error('Crawled'));
             });
             webcheck.crawl({
                 url: 'http://localhost:' + port + '/doNotMiss/ignore'
-            }, function (err) {
+            }, (err: Error): void => {
                 if (err) {
                     return done(err);
                 }
@@ -128,14 +124,14 @@ describe('Crawl Once Plugin', function () {
                 return done();
             });
         });
-        it('should be able to crawl an unfiltered website with another query', function (done) {
-            var crawled;
-            webcheck.once('result', function () {
+        it('should be able to crawl an unfiltered website with another query', (done: MochaDone): void => {
+            var crawled: boolean;
+            webcheck.once('result', (): void => {
                 crawled = true;
             });
             webcheck.crawl({
                 url: 'http://localhost:' + port + '/doNotMiss/?query'
-            }, function (err) {
+            }, (err: Error): void => {
                 if (err) {
                     return done(err);
                 }
@@ -147,11 +143,12 @@ describe('Crawl Once Plugin', function () {
         });
     });
 
-    describe('Ignore query', function () {
-        var webcheck, plugin;
+    describe('Ignore query', (): void => {
+        var webcheck: Webcheck,
+            plugin: CrawlOncePlugin;
 
-        before(function () {
-            webcheck = new Webcheck();
+        before((): void => {
+            webcheck = new Webcheck({});
             plugin = new CrawlOncePlugin({
                 filterUrl: /doNotMiss/,
                 ignoreQuery: true
@@ -159,14 +156,14 @@ describe('Crawl Once Plugin', function () {
             webcheck.addPlugin(plugin);
             plugin.enable();
         });
-        it('should crawl a website if it is not in ignore list', function (done) {
-            var crawled;
-            webcheck.once('result', function () {
+        it('should crawl a website if it is not in ignore list', (done: MochaDone): void => {
+            var crawled: boolean;
+            webcheck.once('result', (): void => {
                 crawled = true;
             });
             webcheck.crawl({
                 url: 'http://localhost:' + port + '/doNotMiss/'
-            }, function (err) {
+            }, (err: Error): void => {
                 if (err) {
                     return done(err);
                 }
@@ -176,13 +173,13 @@ describe('Crawl Once Plugin', function () {
                 return done(new Error('Not crawled'));
             });
         });
-        it('should not crawl a site a second time', function (done) {
-            webcheck.middlewares.push(function () {
+        it('should not crawl a site a second time', (done: MochaDone): void => {
+            webcheck.middlewares.push((): void => {
                 return done(new Error('Crawled again'));
             });
             webcheck.crawl({
                 url: 'http://localhost:' + port + '/doNotMiss/'
-            }, function (err) {
+            }, (err: Error): void => {
                 if (err) {
                     return done(err);
                 }
@@ -190,14 +187,14 @@ describe('Crawl Once Plugin', function () {
                 return done();
             });
         });
-        it('should be able to crawl an unfiltered website', function (done) {
-            var crawled;
-            webcheck.once('result', function () {
+        it('should be able to crawl an unfiltered website', (done: MochaDone): void => {
+            var crawled: boolean;
+            webcheck.once('result', (): void => {
                 crawled = true;
             });
             webcheck.crawl({
                 url: 'http://localhost:' + port + '/miss/'
-            }, function (err) {
+            }, (err: Error): void => {
                 if (err) {
                     return done(err);
                 }
@@ -207,14 +204,14 @@ describe('Crawl Once Plugin', function () {
                 return done(new Error('Not crawled'));
             });
         });
-        it('should be able to crawl an unfiltered website again', function (done) {
-            var crawled;
-            webcheck.once('result', function () {
+        it('should be able to crawl an unfiltered website again', (done: MochaDone): void => {
+            var crawled: boolean;
+            webcheck.once('result', (): void => {
                 crawled = true;
             });
             webcheck.crawl({
                 url: 'http://localhost:' + port + '/miss/'
-            }, function (err) {
+            }, (err: Error): void => {
                 if (err) {
                     return done(err);
                 }
@@ -224,14 +221,14 @@ describe('Crawl Once Plugin', function () {
                 return done(new Error('Not crawled'));
             });
         });
-        it('should not crawl a site from ignore list', function (done) {
+        it('should not crawl a site from ignore list', (done: MochaDone): void => {
             plugin.ignore('http://localhost:' + port + '/doNotMiss/ignore');
-            webcheck.middlewares.push(function () {
+            webcheck.middlewares.push((): void => {
                 return done(new Error('Crawled'));
             });
             webcheck.crawl({
                 url: 'http://localhost:' + port + '/doNotMiss/ignore'
-            }, function (err) {
+            }, (err: Error): void => {
                 if (err) {
                     return done(err);
                 }
@@ -239,13 +236,13 @@ describe('Crawl Once Plugin', function () {
                 return done();
             });
         });
-        it('should not be able to crawl an unfiltered website with another query', function (done) {
-            webcheck.middlewares.push(function () {
+        it('should not be able to crawl an unfiltered website with another query', (done: MochaDone): void => {
+            webcheck.middlewares.push((): void => {
                 return done(new Error('Crawled'));
             });
             webcheck.crawl({
                 url: 'http://localhost:' + port + '/doNotMiss/?query'
-            }, function (err) {
+            }, (err: Error): void => {
                 if (err) {
                     return done(err);
                 }

@@ -1,13 +1,16 @@
 {
   "name": "webcheck-crawl-once",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A plugin for webcheck to prevent multiple downloads of the same resource",
   "main": "webcheck-crawl-once.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "tsc": "tsc",
+    "tsc:w": "tsc -w",
+    "prepublish": "tsc; ts-npm-lint --fix-typings"
   },
   "repository": {
     "type": "git",
@@ -25,7 +28,7 @@
   },
   "homepage": "https://github.com/atd-schubert/webcheck-crawl-once#readme",
   "dependencies": {
-    "webcheck": "~1.0.0"
+    "webcheck": "~1.1.0"
   },
   "devDependencies": {
     "express": "^4.13.3",
