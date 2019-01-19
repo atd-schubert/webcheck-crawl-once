@@ -30,6 +30,3 @@ node_modules
 
 .idea/
 
-index.ts
-webcheck-crawl-once.ts
-

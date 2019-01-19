@@ -1,8 +1,6 @@
-/// <reference path="./typings/main.d.ts" />
-
-import { Plugin as WebcheckPlugin, ICrawlOptions } from 'webcheck';
-import * as url from 'url';
-import * as pkg from './package.json';
+import * as url from "url";
+import { ICrawlOptions, Plugin as WebcheckPlugin } from "webcheck";
+import * as pkg from "./package.json";
 
 export interface ISimplifiedRegExpr {
     test(txt: string): boolean;
@@ -22,10 +20,10 @@ export interface IAssociativeArray<T> {
  * @private
  * @type {{test: Function}}
  */
-var emptyFilter: ISimplifiedRegExpr = { // a spoofed RegExpr...
+const emptyFilter: ISimplifiedRegExpr = { // a spoofed RegExpr...
     test: (): boolean => {
         return true;
-    }
+    },
 };
 
 /**
@@ -44,31 +42,31 @@ export class CrawlOncePlugin extends WebcheckPlugin {
 
     /**
      * List of already crawled resources
-     * @type {IAssociativeArray}
      */
-    public list: IAssociativeArray<boolean> = {};
+    // public list: IAssociativeArray<boolean> = {};
+    public readonly list: Set<string> = new Set<string>();
 
-    constructor(opts?: ICrawlOncePluginOptions) {
+    constructor(opts: ICrawlOncePluginOptions = {}) {
         super();
-        opts = opts || {};
 
-        opts.filterUrl = opts.filterUrl || emptyFilter;
+        const urlFilter = opts.filterUrl || emptyFilter;
         opts.ignoreQuery = opts.ignoreQuery || false;
 
-        this.on['crawl'] = (settings: ICrawlOptions): void => {
-            var parsedUrl: url.Url;
-            if (opts.filterUrl.test(settings.url)) {
-                if (opts.ignoreQuery) {
-                    parsedUrl = url.parse(settings.url);
-                    if (this.ignore(parsedUrl.protocol + '//' + parsedUrl.host + parsedUrl.pathname)) {
-                        settings.preventCrawl = true;
-                    }
-                } else {
-                    if (this.ignore(settings.url)) {
-                        settings.preventCrawl = true;
+        this.on = {
+            crawl: (settings: ICrawlOptions): void => {
+                if (urlFilter.test(settings.url)) {
+                    if (opts.ignoreQuery) {
+                        const parsedUrl = url.parse(settings.url);
+                        if (this.ignore(parsedUrl.protocol + "//" + parsedUrl.host + parsedUrl.pathname)) {
+                            settings.preventCrawl = true;
+                        }
+                    } else {
+                        if (this.ignore(settings.url)) {
+                            settings.preventCrawl = true;
+                        }
                     }
                 }
-            }
+            },
         };
 
         this.reset();
@@ -80,30 +78,30 @@ export class CrawlOncePlugin extends WebcheckPlugin {
      */
     public reset(hash?: string): void {
         if (hash) {
-            delete this.list[hash];
+            this.list.delete(hash);
             return;
         }
-        this.list = {};
+        this.list.clear();
         return;
     }
     /**
      * Ignore a resource and return if a resource is already in ignore list
-     * @param {string} url - Url that should be ignored
+     * @param {string} ignoredUrl - Url that should be ignored
      * @returns {boolean} - Is this url already ignored
      */
-    public ignore(url: string): boolean {
-        if (this.list[url]) {
+    public ignore(ignoredUrl: string): boolean {
+        if (this.list.has(ignoredUrl)) {
             return true;
         }
-        this.list[url] = true;
+        this.list.add(ignoredUrl);
         return false;
     }
     /**
      * Check if a resource is in ignore list
-     * @param url
+     * @param checkedUrl
      * @returns {boolean}
      */
-    check(url: string): boolean {
-        return !!this.list[url];
+    public check(checkedUrl: string): boolean {
+        return this.list.has(checkedUrl);
     }
 }
